@@ -1,19 +1,46 @@
-name: Build Dylib
-on: [push, workflow_dispatch]
+name: Build Roblox Executor Dylib
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Setup Theos
         run: |
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
-      - name: Build dylib
-        run: |
-          make package
-           - name: Upload Result
-        uses: actions/upload-artifact@v4  # تم التحديث لـ v4
-        with:
-          name: Executor-Dylib
-          path: .theos/obj/*.dylib # استخدام النجمة يضمن العثور على الملف مهما كان اسمه
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+          echo "~/theos/bin" >> $GITHUB_PATH
 
+      - name: Setup SDK
+        run: |
+          # تحميل SDK الخاص بـ iOS (ضروري لعمل الـ Compile)
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
+          mkdir -p ~/theos/sdks
+          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
+          rm iPhoneOS14.5.sdk.tar.xz
+
+      - name: Build Project
+        run: |
+          export THEOS=~/theos
+          make clean
+          make
+        env:
+          THEOS: ~/theos
+
+      - name: Upload Dylib Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roblox-Executor-Dylib
+          # هذا المسار يبحث في المجلدات الناتجة عن البناء لاستخراج أي ملف dylib
+          path: |
+            .theos/obj/*.dylib
+            packages/*.deb
+          if-no-files-found: error
