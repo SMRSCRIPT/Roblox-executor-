@@ -11,8 +11,9 @@ jobs:
       - name: Build dylib
         run: |
           make package
-      - name: Upload Result
-        uses: actions/upload-artifact@v3
+           - name: Upload Result
+        uses: actions/upload-artifact@v4  # تم التحديث لـ v4
         with:
           name: Executor-Dylib
-          path: .theos/obj/MyExecutor.dylib
+          path: .theos/obj/*.dylib # استخدام النجمة يضمن العثور على الملف مهما كان اسمه
+
