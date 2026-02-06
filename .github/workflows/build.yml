@@ -17,22 +17,14 @@ jobs:
         run: |
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
           echo "THEOS=~/theos" >> $GITHUB_ENV
-          echo "~/theos/bin" >> $GITHUB_PATH
-
-      - name: Setup SDK (Fixed Link)
-        run: |
-          mkdir -p ~/theos/sdks
-          # استخدام رابط مباشر وموثوق لـ SDK 14.5
-          curl -L "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o iPhoneOS14.5.sdk.tar.xz
-          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
-          rm iPhoneOS14.5.sdk.tar.xz
 
       - name: Build Project
         run: |
           export THEOS=~/theos
-          # تنفيذ الأمر مع تجاهل التحذيرات التي قد تعطل البناء
+          # استخدام الـ SDK الخاص بالماك المدمج (iPhoneOS)
+          export SDKPATH=$(xcrun --sdk iphoneos --show-sdk-path)
           make clean
-          make FINALPACKAGE=1
+          make FINALPACKAGE=1 SYSROOT=$SDKPATH
         env:
           THEOS: ~/theos
 
@@ -40,5 +32,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Roblox-Executor-Dylib
-          path: |
-            .theos/obj/*.dylib
+          path: .theos/obj/*.dylib
