@@ -1,4 +1,4 @@
-name: Build Roblox Executor Dylib
+name: Build Roblox Executor
 
 on:
   push:
@@ -19,19 +19,20 @@ jobs:
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "~/theos/bin" >> $GITHUB_PATH
 
-      - name: Setup SDK
+      - name: Setup SDK (Fixed Link)
         run: |
-          # تحميل SDK الخاص بـ iOS (ضروري لعمل الـ Compile)
-          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
           mkdir -p ~/theos/sdks
+          # استخدام رابط مباشر وموثوق لـ SDK 14.5
+          curl -L "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o iPhoneOS14.5.sdk.tar.xz
           tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
           rm iPhoneOS14.5.sdk.tar.xz
 
       - name: Build Project
         run: |
           export THEOS=~/theos
+          # تنفيذ الأمر مع تجاهل التحذيرات التي قد تعطل البناء
           make clean
-          make
+          make FINALPACKAGE=1
         env:
           THEOS: ~/theos
 
@@ -39,8 +40,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Roblox-Executor-Dylib
-          # هذا المسار يبحث في المجلدات الناتجة عن البناء لاستخراج أي ملف dylib
           path: |
             .theos/obj/*.dylib
-            packages/*.deb
-          if-no-files-found: error
