@@ -1,0 +1,9 @@
+Package: com.yourname.robloxexecutor
+Name: Roblox Executor
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Roblox script executor for iOS
+Maintainer: YourName
+Author: YourName
+Section: Tweaks
+Depends: mobilesubstrate, ws.hbang.common
